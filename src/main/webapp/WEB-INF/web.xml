@@ -1,0 +1,38 @@
+<!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<!-- Все атрибуты были добавлены для поддержки JSTL -->
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+
+    <display-name>Java EE OA project</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index</welcome-file>
+    </welcome-file-list>
+
+    <!-- Params -->
+    <context-param>
+        <param-name>javax.servlet.jsp.jstl.fmt.locale</param-name>
+        <param-value>ru_RU</param-value>
+    </context-param>
+
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>Index</servlet-name>
+        <servlet-class>ua.org.oa.trahomoto.controllers.Index</servlet-class>
+        <init-param>
+            <param-name>i18n</param-name>
+            <param-value>ua.org.oa.trahomoto.app.i18n.index</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Index</servlet-name>
+        <url-pattern>/index</url-pattern>
+    </servlet-mapping>
+
+</web-app>
