@@ -14,24 +14,36 @@
         <welcome-file>index</welcome-file>
     </welcome-file-list>
 
-    <!-- Params -->
-    <context-param>
-        <param-name>javax.servlet.jsp.jstl.fmt.locale</param-name>
-        <param-value>ru_RU</param-value>
-    </context-param>
-
     <!-- Servlets -->
     <servlet>
-        <servlet-name>Index</servlet-name>
-        <servlet-class>ua.org.oa.trahomoto.controllers.Index</servlet-class>
+        <servlet-name>uploader</servlet-name>
+        <servlet-class>ua.org.oa.trahomoto.controllers.Uploader</servlet-class>
+
+        <!-- Bundle с локализованными строками интерфейса -->
         <init-param>
             <param-name>i18n</param-name>
-            <param-value>ua.org.oa.trahomoto.app.i18n.index</param-value>
+            <param-value>ua.org.oa.trahomoto.app.i18n.uploader</param-value>
         </init-param>
+        <!-- Относительный путь к каталогу в который ложить загруженные файлы -->
+        <init-param>
+            <param-name>imgPath</param-name>
+            <param-value>uploaded_images</param-value>
+        </init-param>
+        <!-- Значение аттрибута name, file-input'а который используется для загрузки -->
+        <init-param>
+            <param-name>imgFieldName</param-name>
+            <param-value>image</param-value>
+        </init-param>
+
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>20971520</max-request-size>
+            <file-size-threshold>5242880</file-size-threshold>
+        </multipart-config>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>Index</servlet-name>
+        <servlet-name>uploader</servlet-name>
         <url-pattern>/index</url-pattern>
     </servlet-mapping>
 
