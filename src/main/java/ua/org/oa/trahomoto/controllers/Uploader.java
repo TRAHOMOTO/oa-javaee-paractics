@@ -110,6 +110,11 @@ public class Uploader extends HttpServlet {
      * @return true если token актуален, иначе - false
      */
     private boolean isValidFormToken(HttpServletRequest request) {
+
+        if(isNull(request.getParameter("form_token"))){
+            return false;
+        }
+
         return request.getParameter("form_token").equals(request.getSession().getAttribute("form_token"));
     }
 
