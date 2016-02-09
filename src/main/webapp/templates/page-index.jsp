@@ -29,7 +29,8 @@
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li <c:if test="${lang == 'ua'}">
-                    class="active"</c:if>><a href="?lang=ua">UA</a>
+                    class="active"</c:if>>
+                    <a href="?lang=ua">UA</a>
                 </li>
                 <li <c:if test="${lang == 'ru'}">class="active"</c:if>>
                     <a href="?lang=ru">RU</a>
@@ -66,8 +67,7 @@
                             ${errMessage}
                         </div>
                     </c:if>
-
-                    <c:if test="${hasError == false}">
+                    <c:if test="${hasSuccessMassages == true}">
                         <div class="alert alert-success">
                             <ul>
                                 <c:forEach var="entry" items="${infoMessages}">

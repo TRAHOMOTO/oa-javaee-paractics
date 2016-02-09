@@ -32,6 +32,7 @@ public class Uploader extends HttpServlet {
 
     private static final String TEMPLATE = "/templates/page-index.jsp";
     private static Path uploadPath;
+    private String imageFieldName;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -39,18 +40,19 @@ public class Uploader extends HttpServlet {
 
         String servletCtxPath = getServletContext().getRealPath(getServletContext().getContextPath());
         uploadPath = Paths.get(servletCtxPath, config.getInitParameter("imgPath"));
+        imageFieldName = config.getInitParameter("imgFieldName");
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         preprocessRequest(request, response);
+        postProcessRequest(request, response);
         render(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         preprocessRequest(request, response);
-        request.setAttribute("hasError", false);
 
         ResourceBundle i18n = (ResourceBundle) request.getAttribute("resourceBundle");
 
@@ -75,7 +77,7 @@ public class Uploader extends HttpServlet {
         parts.forEach((part) -> {
 
             // обрабатывает только указанный file input
-            if (part.getName().equals(getInitParameter("imgFieldName"))) {
+            if (part.getName().equals(imageFieldName)) {
 
                 if (isInvalidImagePart(part)) { // Файл не прошел проверку
                     errMessages.put(part.getSubmittedFileName(), i18n.getString("form.error.mime"));
@@ -100,8 +102,10 @@ public class Uploader extends HttpServlet {
         request.setAttribute("errMessages", errMessages);
         request.setAttribute("infoMessages", infoMessages);
 
+        postProcessRequest(request, response);
         render(request, response);
     }
+
 
     /**
      * Проверит токен формы
@@ -138,34 +142,6 @@ public class Uploader extends HttpServlet {
      * @throws IOException
      */
     private void render(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        // Список строковых путей к изображениям
-        List<String> images = new LinkedList<>();
-
-        // часть URL, по которому будут предоставляться изображения методом GET
-        // todo - запилить сервлет для отдачи картинок
-        String preUri
-                = (request.getContextPath().isEmpty() ? "" : request.getContextPath() + "/")
-                + getInitParameter("imgPath") + "/";
-
-        // Перебор всех файлов в каталоге картинок
-        // todo - проверить тип файла
-        if (Files.exists(uploadPath)) {
-            try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(uploadPath)) {
-                dirStream.forEach(path -> {
-                    images.add(preUri + path.getFileName().toString());
-                });
-            }
-        }
-
-        // Передача данных во View
-        request.setAttribute("images", images);
-        request.setAttribute("imgFieldName", getInitParameter("imgFieldName"));
-
-        // Токен для защиты формы от повторного сабмита по Refresh
-        String token = System.currentTimeMillis() + request.getSession().getId();
-        request.setAttribute("form_token", token);
-        request.getSession().setAttribute("form_token", token);
 
         // Render
         getServletContext()
@@ -224,9 +200,54 @@ public class Uploader extends HttpServlet {
         request.setAttribute("lang", i18n.getLanguage());
         request.setAttribute("bundleBaseName", getInitParameter("i18n"));
         request.setAttribute("resourceBundle", ResourceBundle.getBundle((String) request.getAttribute("bundleBaseName"), i18n));
+
+        request.setAttribute("hasError", false);
     }
 
     /**
+     * Дополнение запроса обзательными аттрибутами
+     *
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    private void postProcessRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Список строковых путей к изображениям
+        List<String> images = new LinkedList<>();
+
+        // часть URL, по которому будут предоставляться изображения методом GET
+        // todo - запилить сервлет для отдачи картинок
+        String preUri
+                = (request.getContextPath().isEmpty() ? "" : request.getContextPath() + "/")
+                + getInitParameter("imgPath") + "/";
+
+        // Перебор всех файлов в каталоге картинок
+        // todo - проверить тип файла
+        if (Files.exists(uploadPath)) {
+            try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(uploadPath)) {
+                dirStream.forEach(path -> {
+                    images.add(preUri + path.getFileName().toString());
+                });
+            }
+        }
+
+        // Передача данных во View
+        request.setAttribute("images", images);
+        request.setAttribute("imgFieldName", getInitParameter("imgFieldName"));
+
+        boolean hasError = !isNull(request.getAttribute("hasError")) && (boolean) request.getAttribute("hasError");
+        boolean hasInfoMessages = nonNull(request.getAttribute("infoMessages")) && ((Map) request.getAttribute("infoMessages")).size() > 0;
+
+        request.setAttribute("hasSuccessMassages",  (!hasError && hasInfoMessages));
+
+        // Токен для защиты формы от повторного сабмита по Refresh
+        String token = System.currentTimeMillis() + request.getSession().getId();
+        request.setAttribute("form_token", token);
+        request.getSession().setAttribute("form_token", token);
+    }
+
+    /**
+     * Обработка Part'a
      *
      * @param part
      * @throws IOException
